@@ -1,9 +1,15 @@
+using Microsoft.EntityFrameworkCore;
+using UserManagment;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("UserDb"));
 
 var app = builder.Build();
 
