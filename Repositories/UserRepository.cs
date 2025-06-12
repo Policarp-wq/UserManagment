@@ -22,6 +22,8 @@ namespace UserManagment.Repositories
         /// </summary>
         public async Task<User> CreateUser(UserCreateInfo createInfo, string creator)
         {
+            //if (await _users.SingleOrDefaultAsync(u => u.Login.Equals(createInfo.Login)) != null)
+            //    throw new DatabaseException("This login is already in use");
             var res = await _users.AddAsync(new User()
             {
                 Guid = Guid.NewGuid(),

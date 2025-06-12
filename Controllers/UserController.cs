@@ -1,18 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using UserManagment.ApiContracts.User;
+using UserManagment.Services;
+using UserManagment.Utility;
 
 namespace UserManagment.Controllers
 {
     public class UserController : BaseController
     {
-        public UserController()
+        private readonly IUserService _userService;
+        public UserController(IUserService userService)
         {
-
+            _userService = userService;
         }
-        [HttpGet("hello/{name}")]
-        [ProducesResponseType<string>(StatusCodes.Status200OK)]
-        public IActionResult GetHello(string name)
+        [HttpPost]
+        public async Task<IActionResult> CreateUser([FromBody] UserCreateInfo createInfo)
         {
-            return Ok(name);
+            return Ok(await _userService.CreateUser(createInfo));
         }
     }
 }

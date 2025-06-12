@@ -1,4 +1,6 @@
-﻿namespace UserManagment.Models
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace UserManagment.Models
 {
     public class User
     {

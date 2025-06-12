@@ -9,5 +9,10 @@ namespace UserManagment
         {
         }
         public DbSet<User> Users => Set<User>();
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>().HasKey(u => u.Guid);
+            modelBuilder.Entity<User>().HasIndex(u => u.Login).IsUnique();
+        }
     }
 }

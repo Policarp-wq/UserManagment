@@ -1,4 +1,5 @@
 ﻿using UserManagment.ApiContracts.User;
+using UserManagment.Exceptions;
 using UserManagment.Models;
 using UserManagment.Repositories;
 
@@ -8,8 +9,8 @@ namespace UserManagment.Services
     {
         private readonly IUserRepository _userRepository; 
         private readonly ICurrentActorService _currentActorService;
-        private string Login => _currentActorService.GetLogin();
-        private bool IsAdmin => _currentActorService.IsAdmin();
+        private string CurrentUserLogin => _currentActorService.GetLogin();
+        private bool CurrentUserIsAdmin => _currentActorService.IsAdmin();
         public UserService(ICurrentActorService currentActor, IUserRepository userRepository) 
         {
             _userRepository = userRepository;
@@ -18,67 +19,83 @@ namespace UserManagment.Services
 
         public Task<User> CreateUser(UserCreateInfo createInfo)
         {
-            retrun _userRepository.CreateUser(createInfo, Login);
+            return _userRepository.CreateUser(createInfo, CurrentUserLogin);
         }
 
         public Task<bool> DeleteUserSoft(string login)
         {
-            throw new NotImplementedException();
+            if (!CurrentUserIsAdmin)
+                throw new PermissionException("Attempted to delete data by user without permission");
+            return _userRepository.DeleteUserSoft(login, CurrentUserLogin);
         }
 
         public Task<bool> DeleteUserStrict(string login)
         {
-            throw new NotImplementedException();
+            if (!CurrentUserIsAdmin)
+                throw new PermissionException("Attempted to delete data by user without permission"); //attrs?
+            return _userRepository.DeleteUserStrict(login, CurrentUserLogin);
         }
 
         public Task<IEnumerable<User>> GetActiveUsers()
         {
-            throw new NotImplementedException();
+            if (!CurrentUserIsAdmin)
+                throw new PermissionException("Attempted to receive sensitive data by user without permission");
+            return _userRepository.GetActiveUsers();
         }
 
         public Task<User?> GetUserFullInfo(string login, string password)
         {
-            throw new NotImplementedException();
+            if (!CurrentUserLogin.Equals(login))
+                throw new PermissionException("Attempted to receive user full data by other");
+            return _userRepository.GetUserFullInfo(login, password);
         }
 
         public Task<UserPresentInfo?> GetUserInfoByLogin(string login)
         {
-            throw new NotImplementedException();
+            if (!CurrentUserIsAdmin)
+                throw new PermissionException("Attempted to receive sensitive data by user without permission");
+            return _userRepository.GetUserInfoByLogin(login);
         }
 
         public Task<IEnumerable<User>> GetUsersOlderThanAge(int age)
         {
-            throw new NotImplementedException();
+            if (!CurrentUserIsAdmin)
+                throw new PermissionException("Attempted to receive sensitive data by user without permission");
+            return _userRepository.GetUsersOlderThanAge(age);
         }
 
-        public Task<bool> Recover(string login, string modifier)
+        public Task<bool> Recover(string login)
         {
-            throw new NotImplementedException();
+            if (!CurrentUserIsAdmin)
+                throw new PermissionException("Attempted to recover without permission");
+            return _userRepository.Recover(login, CurrentUserLogin);
         }
 
-        public Task<bool> UpdateLoginByAdmin(string userLogin, string newLogin)
+        public Task<bool> UpdateLogin(string userLogin, string newLogin)
         {
-            throw new NotImplementedException();
+            if(CurrentUserIsAdmin)
+                return _userRepository.UpdateLoginByAdmin(userLogin, newLogin, CurrentUserLogin);
+            if(!CurrentUserLogin.Equals(userLogin))
+                throw new PermissionException("Attempted to update user login by other user");
+            return _userRepository.UpdateLoginByUser(userLogin, newLogin);
         }
 
-        public Task<bool> UpdateLoginByUser(string userLogin, string newLogin)
-        {
-            throw new NotImplementedException();
-        }
 
-        public Task<bool> UpdatePasswordByAdmin(string userLogin, string password)
+        public Task<bool> UpdatePassword(string userLogin, string password)
         {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpdatePasswordByUser(string userLogin, string password)
-        {
-            throw new NotImplementedException();
+            if (CurrentUserIsAdmin)
+                return _userRepository.UpdatePasswordByAdmin(userLogin, password, CurrentUserLogin);
+            if (!CurrentUserLogin.Equals(userLogin))
+                throw new PermissionException("Attempted to update user password by other user");
+            return _userRepository.UpdatePasswordByUser(userLogin, password);
         }
 
         public Task<User> UpdateUser(string userLogin, UserUpdateInfo updateInfo)
         {
-            throw new NotImplementedException();
+            if(CurrentUserIsAdmin || CurrentUserLogin.Equals(userLogin))
+                return _userRepository.UpdateUser(userLogin, updateInfo, CurrentUserLogin);
+            throw new PermissionException("Attempted to update user info by other user without permission");
+
         }
     }
 }
