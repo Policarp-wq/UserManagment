@@ -1,4 +1,5 @@
-﻿using UserManagment.ApiContracts.User;
+﻿using Microsoft.IdentityModel.Tokens;
+using UserManagment.ApiContracts.User;
 using UserManagment.Exceptions;
 using UserManagment.Models;
 using UserManagment.Repositories;
@@ -19,6 +20,8 @@ namespace UserManagment.Services
 
         public Task<User> CreateUser(UserCreateInfo createInfo)
         {
+            if (!CurrentUserIsAdmin)
+                throw new PermissionException("Attempted to delete data by user without permission");
             return _userRepository.CreateUser(createInfo, CurrentUserLogin);
         }
 
@@ -42,7 +45,14 @@ namespace UserManagment.Services
                 throw new PermissionException("Attempted to receive sensitive data by user without permission");
             return _userRepository.GetActiveUsers();
         }
-
+        public async Task<AuthInfo?> GetAuthInfo(string login, string password)
+        {
+            var user = await _userRepository.GetUserFullInfo(login, password);
+            if(user == null)
+                return null;
+            var authInfo = new AuthInfo {Login = user.Login, IsAdmin = user.Admin };
+            return authInfo;
+        }
         public Task<User?> GetUserFullInfo(string login, string password)
         {
             if (!CurrentUserLogin.Equals(login))

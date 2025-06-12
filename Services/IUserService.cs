@@ -9,6 +9,7 @@ namespace UserManagment.Services
         Task<bool> DeleteUserSoft(string login);
         Task<bool> DeleteUserStrict(string login);
         Task<IEnumerable<User>> GetActiveUsers();
+        Task<AuthInfo?> GetAuthInfo(string login, string password);
         Task<User?> GetUserFullInfo(string login, string password);
         Task<UserPresentInfo?> GetUserInfoByLogin(string login);
         Task<IEnumerable<User>> GetUsersOlderThanAge(int age);

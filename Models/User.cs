@@ -19,7 +19,7 @@ namespace UserManagment.Models
         public string ModifiedBy { get; set; } = null!;
         public DateTime? RevokedOn { get; set; }
         public string RevokedBy { get; set; } = null!;
-        public bool IsActive() => RevokedOn != null;
+        public bool IsActive() => RevokedOn == null;
         public bool IsOlderThan(int age) => Birthday != null && (DateTime.UtcNow - Birthday.Value).TotalDays >= age * DAYS_IN_YEAR;
     }
 }

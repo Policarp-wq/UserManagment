@@ -127,7 +127,7 @@ namespace UserManagment.Repositories
         {
             return await _users
                 .AsNoTracking()
-                .Where(u => u.IsActive())
+                .Where(u => u.RevokedOn == null)
                 .OrderBy(u => u.CreatedOn)
                 .ToListAsync();
         }
@@ -161,9 +161,10 @@ namespace UserManagment.Repositories
         /// </summary>
         public async Task<IEnumerable<User>> GetUsersOlderThanAge(int age)
         {
+            var minBirthday = DateTime.UtcNow.AddYears(-age);
             return await _users
                 .AsNoTracking()
-                .Where(u => u.IsOlderThan(age))
+                .Where(u => u.Birthday != null && u.Birthday > minBirthday)
                 .ToListAsync();
         }
         /// <summary>
