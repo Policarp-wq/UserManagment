@@ -1,6 +1,4 @@
-﻿using UserManagment.Models;
-
-namespace UserManagment.Services
+﻿namespace UserManagment.Services
 {
     public interface IJwtProvider
     {

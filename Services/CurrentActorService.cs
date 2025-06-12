@@ -1,6 +1,5 @@
 ﻿using System.Security.Claims;
 using UserManagment.Exceptions;
-using UserManagment.Utility;
 
 namespace UserManagment.Services
 {
@@ -12,7 +11,7 @@ namespace UserManagment.Services
         public CurrentActorService(IHttpContextAccessor httpContextAccessor)
         {
             var httpContext = httpContextAccessor.HttpContext;
-            if(httpContext == null)
+            if (httpContext == null)
             {
                 Login = "undefined";
                 Role = "undefined";

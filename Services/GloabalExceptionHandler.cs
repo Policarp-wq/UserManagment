@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using UserManagment.Exceptions;
 
@@ -11,8 +10,8 @@ namespace UserManagment.Services
         {
             httpContext.Response.StatusCode = exception switch
             {
-                 ServerException serverException => serverException.StatusCode,
-                 _ => StatusCodes.Status500InternalServerError,
+                ServerException serverException => serverException.StatusCode,
+                _ => StatusCodes.Status500InternalServerError,
             };
             return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext()
             {

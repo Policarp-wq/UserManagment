@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.ComponentModel.DataAnnotations;
 using UserManagment.ApiContracts.User;
-using UserManagment.Exceptions;
-using UserManagment.Models;
 using UserManagment.Services;
 using UserManagment.Utility;
 
@@ -27,11 +24,11 @@ namespace UserManagment.Controllers
             });
         }
         [HttpPost("login")]
-        public async Task<IActionResult> Login(IJwtProvider provider,[FromQuery] string login, [FromQuery] string password)
+        public async Task<IActionResult> Login(IJwtProvider provider, [FromQuery] string login, [FromQuery] string password)
         {
             var res = await _userService.GetAuthInfo(login, password);
-            if(res == null) 
-                return new UnauthorizedResult();
+            if (res == null)
+                return Unauthorized("Wrong credentials");
             var token = provider.GenerateToken(res.Login, res.IsAdmin);
             AssignToken(token);
             return Ok(token);
@@ -52,7 +49,7 @@ namespace UserManagment.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteUser([FromQuery] string login, [FromQuery] bool soft)
         {
-            if(soft)
+            if (soft)
                 return Ok(await _userService.DeleteUserSoft(login));
             return Ok(await _userService.DeleteUserStrict(login));
         }
@@ -60,11 +57,11 @@ namespace UserManagment.Controllers
         [Authorize]
         public async Task<IActionResult> GetActiveUsers()
         {
-           return Ok(await _userService.GetActiveUsers());
+            return Ok(await _userService.GetActiveUsers());
         }
         [HttpGet("full")]
         [Authorize]
-        public async Task<IActionResult> GetUserFullInfo([FromQuery]string login, [FromQuery]string password)
+        public async Task<IActionResult> GetUserFullInfo([FromQuery] string login, [FromQuery] string password)
         {
             var res = await _userService.GetUserFullInfo(login, password);
             if (res == null)
@@ -73,7 +70,7 @@ namespace UserManagment.Controllers
         }
         [HttpGet("present")]
         [Authorize]
-        public async Task<IActionResult> GetUserInfoByLogin([FromQuery]string login)
+        public async Task<IActionResult> GetUserInfoByLogin([FromQuery] string login)
         {
             var res = await _userService.GetUserInfoByLogin(login);
             if (res == null)
@@ -84,19 +81,19 @@ namespace UserManagment.Controllers
         [Authorize]
         public async Task<IActionResult> GetUsersOlderThanAge([FromQuery] int age)
         {
-            if(age <= 0)
+            if (age < 0)
                 return BadRequest("Negative age");
             return Ok(await _userService.GetUsersOlderThanAge(age));
         }
         [HttpGet("recover")]
         [Authorize]
-        public async Task<IActionResult> Recover([FromQuery]string login)
+        public async Task<IActionResult> Recover([FromQuery] string login)
         {
             return Ok(await _userService.Recover(login));
         }
         [HttpPatch("edit/login")]
         [Authorize]
-        public async Task<IActionResult> UpdateLogin([FromQuery]string userLogin, [FromQuery]string newLogin)
+        public async Task<IActionResult> UpdateLogin([FromQuery] string userLogin, [FromQuery] string newLogin)
         {
             if (!ModelValidator.IsLoginValid(newLogin))
                 return BadRequest("Invalid new login");
@@ -112,7 +109,7 @@ namespace UserManagment.Controllers
         }
         [HttpPatch("edit")]
         [Authorize]
-        public async Task<IActionResult> UpdateUser([FromQuery]string userLogin, [FromBody]UserUpdateInfo updateInfo)
+        public async Task<IActionResult> UpdateUser([FromQuery] string userLogin, [FromBody] UserUpdateInfo updateInfo)
         {
             return Ok(await _userService.UpdateUser(userLogin, updateInfo));
         }

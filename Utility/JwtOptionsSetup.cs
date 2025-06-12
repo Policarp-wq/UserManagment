@@ -6,7 +6,7 @@ namespace UserManagment.Utility
     {
         public const string JWT_SECTION = "JwtSection";
         private readonly IConfiguration _config;
-        public JwtOptionsSetup(IConfiguration config) 
+        public JwtOptionsSetup(IConfiguration config)
         {
             _config = config;
         }

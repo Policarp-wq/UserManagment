@@ -1,5 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using UserManagment.ApiContracts.User;
+﻿using UserManagment.ApiContracts.User;
 using UserManagment.Exceptions;
 using UserManagment.Models;
 using UserManagment.Repositories;
@@ -8,11 +7,11 @@ namespace UserManagment.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _userRepository; 
+        private readonly IUserRepository _userRepository;
         private readonly ICurrentActorService _currentActorService;
         private string CurrentUserLogin => _currentActorService.GetLogin();
         private bool CurrentUserIsAdmin => _currentActorService.IsAdmin();
-        public UserService(ICurrentActorService currentActor, IUserRepository userRepository) 
+        public UserService(ICurrentActorService currentActor, IUserRepository userRepository)
         {
             _userRepository = userRepository;
             _currentActorService = currentActor;
@@ -29,13 +28,17 @@ namespace UserManagment.Services
         {
             if (!CurrentUserIsAdmin)
                 throw new PermissionException("Attempted to delete data by user without permission");
+            if (CurrentUserLogin.Equals(login))
+                throw new PermissionException("Attempted to delete user by themself");
             return _userRepository.DeleteUserSoft(login, CurrentUserLogin);
         }
 
         public Task<bool> DeleteUserStrict(string login)
         {
             if (!CurrentUserIsAdmin)
-                throw new PermissionException("Attempted to delete data by user without permission"); //attrs?
+                throw new PermissionException("Attempted to delete data by user without permission");
+            if (CurrentUserLogin.Equals(login))
+                throw new PermissionException("Attempted to delete user by themself");
             return _userRepository.DeleteUserStrict(login, CurrentUserLogin);
         }
 
@@ -48,9 +51,9 @@ namespace UserManagment.Services
         public async Task<AuthInfo?> GetAuthInfo(string login, string password)
         {
             var user = await _userRepository.GetUserFullInfo(login, password);
-            if(user == null)
+            if (user == null)
                 return null;
-            var authInfo = new AuthInfo {Login = user.Login, IsAdmin = user.Admin };
+            var authInfo = new AuthInfo { Login = user.Login, IsAdmin = user.Admin };
             return authInfo;
         }
         public Task<User?> GetUserFullInfo(string login, string password)
@@ -83,9 +86,9 @@ namespace UserManagment.Services
 
         public Task<bool> UpdateLogin(string userLogin, string newLogin)
         {
-            if(CurrentUserIsAdmin)
+            if (CurrentUserIsAdmin)
                 return _userRepository.UpdateLoginByAdmin(userLogin, newLogin, CurrentUserLogin);
-            if(!CurrentUserLogin.Equals(userLogin))
+            if (!CurrentUserLogin.Equals(userLogin))
                 throw new PermissionException("Attempted to update user login by other user");
             return _userRepository.UpdateLoginByUser(userLogin, newLogin);
         }
@@ -102,7 +105,7 @@ namespace UserManagment.Services
 
         public Task<User> UpdateUser(string userLogin, UserUpdateInfo updateInfo)
         {
-            if(CurrentUserIsAdmin || CurrentUserLogin.Equals(userLogin))
+            if (CurrentUserIsAdmin || CurrentUserLogin.Equals(userLogin))
                 return _userRepository.UpdateUser(userLogin, updateInfo, CurrentUserLogin);
             throw new PermissionException("Attempted to update user info by other user without permission");
 

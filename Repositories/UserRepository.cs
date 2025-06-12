@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel;
-using System.Diagnostics;
+﻿using Microsoft.EntityFrameworkCore;
 using UserManagment.ApiContracts.User;
 using UserManagment.Exceptions;
 using UserManagment.Models;
@@ -164,7 +161,7 @@ namespace UserManagment.Repositories
             var minBirthday = DateTime.UtcNow.AddYears(-age);
             return await _users
                 .AsNoTracking()
-                .Where(u => u.Birthday != null && u.Birthday > minBirthday)
+                .Where(u => u.Birthday != null && u.Birthday <= minBirthday)
                 .ToListAsync();
         }
         /// <summary>

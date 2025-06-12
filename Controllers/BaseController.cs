@@ -8,7 +8,7 @@ namespace UserManagment.Controllers
     {
         public BaseController()
         {
-            
+
         }
     }
 }

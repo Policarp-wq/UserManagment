@@ -28,9 +28,9 @@ namespace UserManagment.ApiContracts.User
                 yield return new ValidationResult("Login must contain only latin letters and digits");
             if (!ModelValidator.IsPasswordValid(Pasword))
                 yield return new ValidationResult("Password must contain only latin letters and digits");
-            if(!ModelValidator.IsNameValid(Name))
+            if (!ModelValidator.IsNameValid(Name))
                 yield return new ValidationResult("Name must contain only latin or russian letters");
-            if(!ModelValidator.IsGenderValid(Gender))
+            if (!ModelValidator.IsGenderValid(Gender))
                 yield return new ValidationResult("Gender must be in range [0, 2]");
         }
     }
