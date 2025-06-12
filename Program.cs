@@ -20,6 +20,9 @@ builder.Services.AddControllers();
 //builder.Services.AddOpenApi();
 builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
 
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GloabalExceptionHandler>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -98,7 +101,7 @@ using (var scope = app.Services.CreateScope())
 }
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
+app.UseExceptionHandler();
 app.Run();
 
