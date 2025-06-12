@@ -8,11 +8,11 @@ using UserManagment.Models;
 
 namespace UserManagment.Repositories
 {
-    public class UserRepository
+    public class UserRepository : IUserRepository
     {
         private readonly AppDbContext _context;
         private readonly DbSet<User> _users;
-        public UserRepository(AppDbContext dbContext) 
+        public UserRepository(AppDbContext dbContext)
         {
             _context = dbContext;
             _users = dbContext.Users;
@@ -53,7 +53,7 @@ namespace UserManagment.Repositories
             var user = await GetUserByLogin(userLogin);
             if (!user.IsActive())
                 throw new DatabaseException($"Failed to update user with login {userLogin}: this user is revoked");
-            user.Name = updateInfo.Name ?? user.Name; 
+            user.Name = updateInfo.Name ?? user.Name;
             user.Gender = updateInfo.Gender ?? user.Gender;
             user.Birthday = updateInfo.Birthday;
             user.ModifiedBy = modifier;
@@ -63,7 +63,7 @@ namespace UserManagment.Repositories
         }
         private async Task<bool> UpdatePasswordRaw(User user, string password, string modifier)
         {
-            if(user.Password.Equals(password))
+            if (user.Password.Equals(password))
                 return false;
 
             user.Password = password;
@@ -92,7 +92,8 @@ namespace UserManagment.Repositories
         {
             if (user.Login.Equals(newLogin))
                 return false;
-            if(await _users.AnyAsync(u => u.Login.Equals(newLogin))){
+            if (await _users.AnyAsync(u => u.Login.Equals(newLogin)))
+            {
                 throw new DatabaseException($"Failed to update login for user with login {user.Login}: this login is already in use");
             }
             user.Login = newLogin;
@@ -133,11 +134,11 @@ namespace UserManagment.Repositories
         /// </summary>
         public async Task<UserPresentInfo?> GetUserInfoByLogin(string login)
         {
-             return await _users
-                .AsNoTracking()
-                .Where(u => u.Login.Equals(login))
-                .Select(u => new UserPresentInfo(u.Name, u.Gender, u.Birthday, u.IsActive()))
-                .SingleOrDefaultAsync();
+            return await _users
+               .AsNoTracking()
+               .Where(u => u.Login.Equals(login))
+               .Select(u => new UserPresentInfo(u.Name, u.Gender, u.Birthday, u.IsActive()))
+               .SingleOrDefaultAsync();
         }
         /// <summary>
         /// Only for user
@@ -147,7 +148,7 @@ namespace UserManagment.Repositories
             var user = await _users
                 .AsNoTracking()
                 .SingleOrDefaultAsync(u => u.Login.Equals(login) && u.Password.Equals(password));
-            if(user == null)
+            if (user == null)
                 return null;
             if (!user.IsActive())
                 throw new DatabaseException($"Failed to return user info for {login}: this user is revoked"); // general method for checking is revoked?
@@ -191,14 +192,14 @@ namespace UserManagment.Repositories
         public async Task<bool> Recover(string login, string modifier)
         {
             var user = await GetUserByLogin(login);
-            if(user.RevokedOn == null)
+            if (user.RevokedOn == null)
                 return false;
             user.RevokedOn = null;
             user.RevokedBy = "";
             user.ModifiedBy = modifier;
             user.ModifiedOn = DateTime.UtcNow;
             await _context.SaveChangesAsync();
-            return true;    
+            return true;
         }
     }
 }
